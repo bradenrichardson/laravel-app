@@ -1,0 +1,32 @@
+name: Deploy Application
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+    service_name: laravel-app
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+    
+      - uses: php-actions/composer@v6
+      - uses: php-actions/phpunit@v3
+    
+      - name: Build docker image
+        run: docker build -t ${{ env.service_name }} ./app
+    
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'app:test'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+    
+
+
